@@ -30,14 +30,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.security.AccessController;
 import java.security.AccessControlContext;
+import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.List;
-import java.util.NoSuchElementException;
 
 
 /**
@@ -207,22 +202,32 @@ public final class ServiceLoader<S>
      * Clear this loader's provider cache so that all providers will be
      * reloaded.
      *
+     * 为了所有的服务提供者被重新加载，清除加载器缓存里服务提供者的实例。
+     *
      * <p> After invoking this method, subsequent invocations of the {@link
      * #iterator() iterator} method will lazily look up and instantiate
      * providers from scratch, just as is done by a newly-created loader.
      *
+     * 在调用这个方法之后，后续 iterator() 方法的调用将惰性地从头查询并且实例化服务提供者，正如新创建的加载器所做的那样。
+     *
      * <p> This method is intended for use in situations in which new providers
      * can be installed into a running Java virtual machine.
+     *
+     * 此方法用于可以将新的服务提供者安装到运行的Java虚拟机中的情况。
+     *
      */
     public void reload() {
+        // 清除缓存里的服务提供者实例
         providers.clear();
+        // 创建一个迭代器
         lookupIterator = new LazyIterator(service, loader);
     }
-
+    // 配置类加载器和安全管理器
     private ServiceLoader(Class<S> svc, ClassLoader cl) {
         service = Objects.requireNonNull(svc, "Service interface cannot be null");
         loader = (cl == null) ? ClassLoader.getSystemClassLoader() : cl;
         acc = (System.getSecurityManager() != null) ? AccessController.getContext() : null;
+        // 为了所有的服务提供者被重新加载，清除加载器缓存里服务提供者的实例。
         reload();
     }
 
@@ -319,7 +324,7 @@ public final class ServiceLoader<S>
     }
 
     // Private inner class implementing fully-lazy provider lookup
-    //
+    // 实现了完全惰性查找服务提供者的私有内部类
     private class LazyIterator
         implements Iterator<S>
     {
@@ -419,10 +424,15 @@ public final class ServiceLoader<S>
     /**
      * Lazily loads the available providers of this loader's service.
      *
+     * 懒加载当前加载器服务的可用服务提供者
+     *
      * <p> The iterator returned by this method first yields all of the
      * elements of the provider cache, in instantiation order.  It then lazily
      * loads and instantiates any remaining providers, adding each one to the
      * cache in turn.
+     *
+     * 该方法返回的迭代器首先按照实例化顺序生成服务提供者缓存的所有元素。它之后懒加载和实例化
+     * 所有剩下的服务提供者，依次把它们添加到缓存里。
      *
      * <p> To achieve laziness the actual work of parsing the available
      * provider-configuration files and instantiating providers must be done by
@@ -464,7 +474,7 @@ public final class ServiceLoader<S>
      */
     public Iterator<S> iterator() {
         return new Iterator<S>() {
-
+            // 返回已知服务提供者的迭代器
             Iterator<Map.Entry<String,S>> knownProviders
                 = providers.entrySet().iterator();
 
@@ -534,7 +544,9 @@ public final class ServiceLoader<S>
      * @return A new service loader
      */
     public static <S> ServiceLoader<S> load(Class<S> service) {
+        // 获取当前线程的上下文类加载器
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
+        // service 代表接口或者抽象类
         return ServiceLoader.load(service, cl);
     }
 

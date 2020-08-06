@@ -110,19 +110,19 @@ public class ArrayList<E> extends AbstractList<E>
     private static final long serialVersionUID = 8683452581122892189L;
 
     /**
-     * Default initial capacity.
+     * Default initial capacity. 默认的 list 容量
      */
     private static final int DEFAULT_CAPACITY = 10;
 
     /**
-     * Shared empty array instance used for empty instances.
+     * Shared empty array instance used for empty instances. 空的 Object 数组
      */
     private static final Object[] EMPTY_ELEMENTDATA = {};
 
     /**
      * Shared empty array instance used for default sized empty instances. We
      * distinguish this from EMPTY_ELEMENTDATA to know how much to inflate when
-     * first element is added.
+     * first element is added. 默认容量的 Object 数组
      */
     private static final Object[] DEFAULTCAPACITY_EMPTY_ELEMENTDATA = {};
 
@@ -130,28 +130,28 @@ public class ArrayList<E> extends AbstractList<E>
      * The array buffer into which the elements of the ArrayList are stored.
      * The capacity of the ArrayList is the length of this array buffer. Any
      * empty ArrayList with elementData == DEFAULTCAPACITY_EMPTY_ELEMENTDATA
-     * will be expanded to DEFAULT_CAPACITY when the first element is added.
+     * will be expanded to DEFAULT_CAPACITY when the first element is added. 用来存储元素
      */
     transient Object[] elementData; // non-private to simplify nested class access
 
     /**
      * The size of the ArrayList (the number of elements it contains).
-     *
+     * list 的元素个数
      * @serial
      */
     private int size;
 
     /**
      * Constructs an empty list with the specified initial capacity.
-     *
+     * 创建一个指定容量的空 list
      * @param  initialCapacity  the initial capacity of the list
      * @throws IllegalArgumentException if the specified initial capacity
      *         is negative
      */
     public ArrayList(int initialCapacity) {
-        if (initialCapacity > 0) {
+        if (initialCapacity > 0) { // 指定的容量大于 0 则创建一个指定容量的 Object 数组
             this.elementData = new Object[initialCapacity];
-        } else if (initialCapacity == 0) {
+        } else if (initialCapacity == 0) {// 如果容量等于 0 则创建一个空的 Object 数组
             this.elementData = EMPTY_ELEMENTDATA;
         } else {
             throw new IllegalArgumentException("Illegal Capacity: "+
@@ -160,7 +160,7 @@ public class ArrayList<E> extends AbstractList<E>
     }
 
     /**
-     * Constructs an empty list with an initial capacity of ten.
+     * Constructs an empty list with an initial capacity of ten. 不指定容量则创建一个默认容量为 10 的 list
      */
     public ArrayList() {
         this.elementData = DEFAULTCAPACITY_EMPTY_ELEMENTDATA;
@@ -175,13 +175,13 @@ public class ArrayList<E> extends AbstractList<E>
      * @throws NullPointerException if the specified collection is null
      */
     public ArrayList(Collection<? extends E> c) {
-        elementData = c.toArray();
-        if ((size = elementData.length) != 0) {
+        elementData = c.toArray();//先转成 Object[]
+        if ((size = elementData.length) != 0) {// 判断数组长度是否为 0
             // c.toArray might (incorrectly) not return Object[] (see 6260652)
-            if (elementData.getClass() != Object[].class)
+            if (elementData.getClass() != Object[].class) // 如果这个数组不是 Object[] 则把 elementData 转换成 Object[]
                 elementData = Arrays.copyOf(elementData, size, Object[].class);
         } else {
-            // replace with empty array.
+            // 说明数组元素为 0 既是一个空数组，则用一个空的 Object[] 替代
             this.elementData = EMPTY_ELEMENTDATA;
         }
     }
@@ -204,39 +204,39 @@ public class ArrayList<E> extends AbstractList<E>
      * Increases the capacity of this <tt>ArrayList</tt> instance, if
      * necessary, to ensure that it can hold at least the number of elements
      * specified by the minimum capacity argument.
-     *
+     * 此方法在 ArrayList 里没有被使用，是让用户自己使用，当要添加大量元素之前可以使用此方法,此方法提前创建一个能至少容纳 minCapacity 的数组，来减少扩容次数，提高效率。
      * @param   minCapacity   the desired minimum capacity
      */
     public void ensureCapacity(int minCapacity) {
-        int minExpand = (elementData != DEFAULTCAPACITY_EMPTY_ELEMENTDATA)
+        int minExpand = (elementData != DEFAULTCAPACITY_EMPTY_ELEMENTDATA) //如果 list 不为空则把 minExpand 设置为 0 否则为 10
             // any size if not default element table
             ? 0
             // larger than default for default empty table. It's already
             // supposed to be at default size.
             : DEFAULT_CAPACITY;
-
+        // 如果 minCapacity 大于 minExpand 则尝试扩容
         if (minCapacity > minExpand) {
             ensureExplicitCapacity(minCapacity);
         }
     }
-
+    // 计算出 minCapacity 如果是第一次添加元素则把 minCapacity 设置为 10
     private static int calculateCapacity(Object[] elementData, int minCapacity) {
-        if (elementData == DEFAULTCAPACITY_EMPTY_ELEMENTDATA) {
-            return Math.max(DEFAULT_CAPACITY, minCapacity);
+        if (elementData == DEFAULTCAPACITY_EMPTY_ELEMENTDATA) { // 如果当前 elementData 是空的则让默认容量 10 与 minCapacity 作比较，取最大的一个并返回
+            return Math.max(DEFAULT_CAPACITY, minCapacity); //
         }
-        return minCapacity;
+        return minCapacity; // 说明 elementData 不为空
     }
-
+    //
     private void ensureCapacityInternal(int minCapacity) {
         ensureExplicitCapacity(calculateCapacity(elementData, minCapacity));
     }
 
     private void ensureExplicitCapacity(int minCapacity) {
-        modCount++;
+        modCount++;// 添加一个元素则要对 modCount 属性 + 1
 
-        // overflow-conscious code
+        //把 minCapacity 与 elementData 长度作比较 如果 minCapacity 大于 elementData 长度 说明底层的 Object[] 容量不够了需要扩容
         if (minCapacity - elementData.length > 0)
-            grow(minCapacity);
+            grow(minCapacity);//执行扩容
     }
 
     /**
@@ -250,21 +250,21 @@ public class ArrayList<E> extends AbstractList<E>
     /**
      * Increases the capacity to ensure that it can hold at least the
      * number of elements specified by the minimum capacity argument.
-     *
+     * 底层的 Object[] 需要扩容 ，确保它能容纳最小的容量既 minCapacity
      * @param minCapacity the desired minimum capacity
      */
     private void grow(int minCapacity) {
         // overflow-conscious code
-        int oldCapacity = elementData.length;
-        int newCapacity = oldCapacity + (oldCapacity >> 1);
-        if (newCapacity - minCapacity < 0)
-            newCapacity = minCapacity;
-        if (newCapacity - MAX_ARRAY_SIZE > 0)
+        int oldCapacity = elementData.length;// 获取当前的 Object[] 长度既 oldCapacity
+        int newCapacity = oldCapacity + (oldCapacity >> 1);// 对 oldCapacity * 1.5 等于 newCapacity
+        if (newCapacity - minCapacity < 0) // newCapacity 如果不满足 minCapacity
+            newCapacity = minCapacity;//则把 newCapacity 设为 minCapacity
+        if (newCapacity - MAX_ARRAY_SIZE > 0) // 如果 newCapacity 大于 Integer.MAX_VALUE - 8 则把 newCapacity 设置为 Integer.MAX_VALUE
             newCapacity = hugeCapacity(minCapacity);
         // minCapacity is usually close to size, so this is a win:
-        elementData = Arrays.copyOf(elementData, newCapacity);
+        elementData = Arrays.copyOf(elementData, newCapacity);// 把原来 elementData 里的元素拷贝到新的容量为 newCapacity 的 Object[] 数组了
     }
-
+    // 与 minCapacity 作比较，如果 minCapacity 大于 Integer.MAX_VALUE - 8 则返回 Integer.MAX_VALUE 否则返回 Integer.MAX_VALUE - 8。
     private static int hugeCapacity(int minCapacity) {
         if (minCapacity < 0) // overflow
             throw new OutOfMemoryError();
@@ -454,13 +454,13 @@ public class ArrayList<E> extends AbstractList<E>
 
     /**
      * Appends the specified element to the end of this list.
-     *
+     * 在 list 尾部添加一个指定的元素，
      * @param e element to be appended to this list
      * @return <tt>true</tt> (as specified by {@link Collection#add})
      */
     public boolean add(E e) {
-        ensureCapacityInternal(size + 1);  // Increments modCount!!
-        elementData[size++] = e;
+        ensureCapacityInternal(size + 1);  // 如果有扩容的必要则先扩容
+        elementData[size++] = e; // 在数组尾部添加元素
         return true;
     }
 
@@ -474,12 +474,12 @@ public class ArrayList<E> extends AbstractList<E>
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
     public void add(int index, E element) {
-        rangeCheckForAdd(index);
-
+        rangeCheckForAdd(index); // 对 index 进行检查
+        // 如有必要进行扩容
         ensureCapacityInternal(size + 1);  // Increments modCount!!
         System.arraycopy(elementData, index, elementData, index + 1,
-                         size - index);
-        elementData[index] = element;
+                         size - index);//这里的方法很简单，就是把 index 后面的所有元素都往后移动一个位置
+        elementData[index] = element;// 添加元素到 index 上
         size++;
     }
 

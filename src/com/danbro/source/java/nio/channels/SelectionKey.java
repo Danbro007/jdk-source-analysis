@@ -26,7 +26,6 @@
 package java.nio.channels;
 
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
-import java.io.IOException;
 
 
 /**
@@ -120,6 +119,8 @@ public abstract class SelectionKey {
     /**
      * Returns the channel for which this key was created.  This method will
      * continue to return the channel even after the key is cancelled.
+     *
+     * 返回这个 key 创建的通道。即使这个 key 被取消之后，这个方法还是会返回通道。
      *
      * @return  This key's channel
      */

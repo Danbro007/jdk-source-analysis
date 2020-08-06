@@ -3206,12 +3206,12 @@ public class Arrays {
      * @since 1.6
      */
     public static <T,U> T[] copyOf(U[] original, int newLength, Class<? extends T[]> newType) {
-        @SuppressWarnings("unchecked")
+        @SuppressWarnings("unchecked") // 如果原始数组的类型是 Object[] 则创建一个新的 Object[] 容量为扩容后的容量，如果不是则创建一个新的数组，类型是 newType 的组件类型，容量为扩容的容量
         T[] copy = ((Object)newType == (Object)Object[].class)
             ? (T[]) new Object[newLength]
             : (T[]) Array.newInstance(newType.getComponentType(), newLength);
         System.arraycopy(original, 0, copy, 0,
-                         Math.min(original.length, newLength));
+                         Math.min(original.length, newLength));// 使用 System.arraycopy 把数组里的全部元素拷贝到新的数组里
         return copy;
     }
 
@@ -3797,11 +3797,15 @@ public class Arrays {
     @SafeVarargs
     @SuppressWarnings("varargs")
     public static <T> List<T> asList(T... a) {
+        // 创建一个 Arrays 里静态内部类 ArrayList
         return new ArrayList<>(a);
     }
 
     /**
      * @serial include
+     *
+     * Arrays 的静态内部类，不支持 add() 、remove()、clear() 方法，如果调用会抛出 UnsupportedOperationException 异常
+     *
      */
     private static class ArrayList<E> extends AbstractList<E>
         implements RandomAccess, java.io.Serializable

@@ -2041,6 +2041,9 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
     }
 
     /**
+     *
+     * 当任务超过执行队列的容量时直接抛出 RejectedExecutionException 异常
+     *
      * A handler for rejected tasks that throws a
      * {@code RejectedExecutionException}.
      */
