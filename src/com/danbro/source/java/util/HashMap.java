@@ -691,8 +691,8 @@ public class HashMap<K,V> extends AbstractMap<K,V>
         else if (oldThr > 0) // 如果旧的扩容阈值大于 0 则把新的阈值设置为旧的阈值
             newCap = oldThr;
         else {               // zero initial threshold signifies using defaults
-            newCap = DEFAULT_INITIAL_CAPACITY; // 新的容量为 10
-            newThr = (int)(DEFAULT_LOAD_FACTOR * DEFAULT_INITIAL_CAPACITY); // 新的扩容阈值为 负载因子 * 10
+            newCap = DEFAULT_INITIAL_CAPACITY; // 新的容量为 16
+            newThr = (int)(DEFAULT_LOAD_FACTOR * DEFAULT_INITIAL_CAPACITY); // 新的扩容阈值为 负载因子 * 16
         }
         if (newThr == 0) { // 新的阈值还是为 0 则通过新的容量 * 负载因子获取 ft
             float ft = (float)newCap * loadFactor;//
@@ -701,7 +701,7 @@ public class HashMap<K,V> extends AbstractMap<K,V>
         }
         threshold = newThr; //
         @SuppressWarnings({"rawtypes","unchecked"})
-        Node<K,V>[] newTab = (Node<K,V>[])new Node[newCap]; // 创建一个新的 table 长度为新的容量 newCap
+        Node<K,V>[] newTab = (Node<K,V>[])new Node[newCap]; // 创建一个新的 table 长度为 newCap
         table = newTab;// 覆盖原有的 table
         if (oldTab != null) { // 遍历原来的 table 的节点，把节点放入新的 table 里
             for (int j = 0; j < oldCap; ++j) {
