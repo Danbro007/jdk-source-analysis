@@ -468,7 +468,7 @@ public class ArrayList<E> extends AbstractList<E>
      * Inserts the specified element at the specified position in this
      * list. Shifts the element currently at that position (if any) and
      * any subsequent elements to the right (adds one to their indices).
-     *
+     * 在指定位置后面添加一个元素
      * @param index index at which the specified element is to be inserted
      * @param element element to be inserted
      * @throws IndexOutOfBoundsException {@inheritDoc}
@@ -487,7 +487,7 @@ public class ArrayList<E> extends AbstractList<E>
      * Removes the element at the specified position in this list.
      * Shifts any subsequent elements to the left (subtracts one from their
      * indices).
-     *
+     * 删除指定位置的元素
      * @param index the index of the element to be removed
      * @return the element that was removed from the list
      * @throws IndexOutOfBoundsException {@inheritDoc}
@@ -521,7 +521,7 @@ public class ArrayList<E> extends AbstractList<E>
      * @return <tt>true</tt> if this list contained the specified element
      */
     public boolean remove(Object o) {
-        if (o == null) {
+        if (o == null) {// 如果要删除的元素是 null 则遍历找到那个 null 的 index，然后把 index 之后的元素往前移动一位
             for (int index = 0; index < size; index++)
                 if (elementData[index] == null) {
                     fastRemove(index);
@@ -539,15 +539,15 @@ public class ArrayList<E> extends AbstractList<E>
 
     /*
      * Private remove method that skips bounds checking and does not
-     * return the value removed.
+     * return the value removed. 私有的删除方法，这个方法跳过了边界检查并且不返回删除的值
      */
     private void fastRemove(int index) {
         modCount++;
-        int numMoved = size - index - 1;
+        int numMoved = size - index - 1;// 要移动的元素数
         if (numMoved > 0)
             System.arraycopy(elementData, index+1, elementData, index,
                              numMoved);
-        elementData[--size] = null; // clear to let GC do its work
+        elementData[--size] = null; // clear to let GC do its work 把 list 里的元素数减1，然后把最后一个元素设置 null 让 GC 回收
     }
 
     /**
@@ -846,7 +846,7 @@ public class ArrayList<E> extends AbstractList<E>
     private class Itr implements Iterator<E> {
         int cursor;       // index of next element to return
         int lastRet = -1; // index of last element returned; -1 if no such
-        int expectedModCount = modCount;
+        int expectedModCount = modCount; // 在集合进行迭代的时候会把 modCount 赋值给 expectedModCount,如果在迭代的时候添加一个元素，则 modCount 会加 1 而 expectedModCount 不会变化
 
         Itr() {}
 
@@ -856,7 +856,7 @@ public class ArrayList<E> extends AbstractList<E>
 
         @SuppressWarnings("unchecked")
         public E next() {
-            checkForComodification();
+            checkForComodification();// 检查 modCount 和 expectedModCount 是否相等 ，如果不相等则抛出异常
             int i = cursor;
             if (i >= size)
                 throw new NoSuchElementException();

@@ -101,7 +101,7 @@ public class LinkedList<E>
     transient Node<E> last;
 
     /**
-     * Constructs an empty list.
+     * Constructs an empty list. 空构造器
      */
     public LinkedList() {
     }
@@ -126,7 +126,7 @@ public class LinkedList<E>
         final Node<E> f = first;
         final Node<E> newNode = new Node<>(null, e, f);
         first = newNode;
-        if (f == null)
+        if (f == null) // 头节点不存在
             last = newNode;
         else
             f.prev = newNode;
@@ -135,33 +135,33 @@ public class LinkedList<E>
     }
 
     /**
-     * Links e as last element.
+     * Links e as last element. 尾部追加元素
      */
     void linkLast(E e) {
-        final Node<E> l = last;
-        final Node<E> newNode = new Node<>(l, e, null);
-        last = newNode;
-        if (l == null)
+        final Node<E> l = last; // 先找到链表最后的一个节点 l
+        final Node<E> newNode = new Node<>(l, e, null); // 为要添加的元素创建一个节点对象，这个节点的上一个节点指向 l
+        last = newNode; // last 指向我们刚刚创建的节点
+        if (l == null) // 如果 l 为 null 说明这个链表是空的则把 first 也指向新的节点
             first = newNode;
         else
-            l.next = newNode;
-        size++;
-        modCount++;
+            l.next = newNode; // 说明不是空的链表，把 l 的 next 指向新的节点
+        size++; // 元素数加 1
+        modCount++; // 操作数 + 1
     }
 
     /**
-     * Inserts element e before non-null Node succ.
+     * Inserts element e before non-null Node succ. 在一个非 null 节点前插入元素
      */
     void linkBefore(E e, Node<E> succ) {
         // assert succ != null;
-        final Node<E> pred = succ.prev;
-        final Node<E> newNode = new Node<>(pred, e, succ);
-        succ.prev = newNode;
-        if (pred == null)
+        final Node<E> pred = succ.prev; // 要插入元素的前面一个
+        final Node<E> newNode = new Node<>(pred, e, succ); // 把要插入元素封装成一个 Node 对象，里面有 pre 和 next 节点
+        succ.prev = newNode;  // succ 的前一个节点是我们的新添加的元素
+        if (pred == null) // 说明链表原来只有一个 succ 一个元素，则头节点就是我们添加的元素
             first = newNode;
         else
             pred.next = newNode;
-        size++;
+        size++;// 链表里的元素数量加 1
         modCount++;
     }
 
@@ -170,18 +170,18 @@ public class LinkedList<E>
      */
     private E unlinkFirst(Node<E> f) {
         // assert f == first && f != null;
-        final E element = f.item;
-        final Node<E> next = f.next;
-        f.item = null;
-        f.next = null; // help GC
-        first = next;
-        if (next == null)
-            last = null;
-        else
-            next.prev = null;
-        size--;
+        final E element = f.item; // 头节点的数据
+        final Node<E> next = f.next;// 头节点的 next 节点
+        f.item = null; // 清空节点数据
+        f.next = null; // help GC 把头节点的 next 设置为 null 之后会有 GC 回收
+        first = next; // 把之前头节点的 next 节点设置为头节点
+        if (next == null) // 说明原来链表只有一个元素
+            last = null; // 删除了头节点后此时链表为空
+        else // 说明删除头节点后链表里还有元素
+            next.prev = null; // 把 next 的 prev 设置为 null
+        size--; // 链表元素数减1
         modCount++;
-        return element;
+        return element; // 返回头节点的数据
     }
 
     /**
@@ -189,18 +189,18 @@ public class LinkedList<E>
      */
     private E unlinkLast(Node<E> l) {
         // assert l == last && l != null;
-        final E element = l.item;
-        final Node<E> prev = l.prev;
-        l.item = null;
-        l.prev = null; // help GC
-        last = prev;
-        if (prev == null)
-            first = null;
-        else
-            prev.next = null;
-        size--;
+        final E element = l.item; // 获取尾节点的数据
+        final Node<E> prev = l.prev; // 尾节点的 prev 节点
+        l.item = null; // 清空尾节点的数据
+        l.prev = null; // help GC 把尾节点的 prev 设置为 null，GC会回收
+        last = prev; // 把原来尾节点的 prev 的节点设置为新的尾节点
+        if (prev == null) // 如果 prev 为 null，说明此时链表已经为空
+            first = null; // 头节点也设置为 null
+        else // 说明链表里还有元素
+            prev.next = null; // 则把新的尾节点的 next 设置为 null
+        size--; // 链表里的元素数减1
         modCount++;
-        return element;
+        return element; // 返回被删除的元素
     }
 
     /**
@@ -208,28 +208,28 @@ public class LinkedList<E>
      */
     E unlink(Node<E> x) {
         // assert x != null;
-        final E element = x.item;
-        final Node<E> next = x.next;
-        final Node<E> prev = x.prev;
+        final E element = x.item; // 要删除的节点数据
+        final Node<E> next = x.next; // 该节点的的后驱节点
+        final Node<E> prev = x.prev; // 该节点的前驱节点
 
-        if (prev == null) {
-            first = next;
-        } else {
-            prev.next = next;
-            x.prev = null;
+        if (prev == null) { // 说明被删除的节点是头节点
+            first = next; // 把头节点设置为被删除节点的后驱节点
+        } else { // 被删除的节点不是头节点
+            prev.next = next; // 被删除节点的前驱节点的后驱节点设置为被删除节点的后驱节点，既把前驱节点和后驱节点连接起来
+            x.prev = null; // 被删除节点的前驱节点设置为 null
         }
 
-        if (next == null) {
-            last = prev;
+        if (next == null) { // 说明被删除的节点是尾节点
+            last = prev; // 把前驱节点设置为新的尾节点
         } else {
-            next.prev = prev;
-            x.next = null;
+            next.prev = prev; // 把后驱节点的前驱节点设置为被删除节点的前驱节点
+            x.next = null; // 把被删除节点的额后驱节点设置为 null
         }
 
-        x.item = null;
-        size--;
+        x.item = null; // 清空被删除元素的数据
+        size--; // 链表元素数减1
         modCount++;
-        return element;
+        return element; // 返回被删除的元素
     }
 
     /**
@@ -238,11 +238,11 @@ public class LinkedList<E>
      * @return the first element in this list
      * @throws NoSuchElementException if this list is empty
      */
-    public E getFirst() {
-        final Node<E> f = first;
-        if (f == null)
+    public E getFirst() { // 获取链表头节点没有则抛出异常。
+        final Node<E> f = first; // 获取链表的头节点
+        if (f == null) // 头节点为 null 则抛出异常
             throw new NoSuchElementException();
-        return f.item;
+        return f.item; // 返回节点里的数据
     }
 
     /**
@@ -265,10 +265,10 @@ public class LinkedList<E>
      * @throws NoSuchElementException if this list is empty
      */
     public E removeFirst() {
-        final Node<E> f = first;
+        final Node<E> f = first; // 找到头节点，没有则抛出异常。
         if (f == null)
             throw new NoSuchElementException();
-        return unlinkFirst(f);
+        return unlinkFirst(f); // 执行删除头节点的操作
     }
 
     /**
@@ -277,7 +277,7 @@ public class LinkedList<E>
      * @return the last element from this list
      * @throws NoSuchElementException if this list is empty
      */
-    public E removeLast() {
+    public E removeLast() { // 删除链表的尾节点
         final Node<E> l = last;
         if (l == null)
             throw new NoSuchElementException();
@@ -328,7 +328,7 @@ public class LinkedList<E>
 
     /**
      * Appends the specified element to the end of this list.
-     *
+     * 在链表尾部添加一个元素
      * <p>This method is equivalent to {@link #addLast}.
      *
      * @param e element to be appended to this list
@@ -352,11 +352,11 @@ public class LinkedList<E>
      * @param o element to be removed from this list, if present
      * @return {@code true} if this list contained the specified element
      */
-    public boolean remove(Object o) {
-        if (o == null) {
-            for (Node<E> x = first; x != null; x = x.next) {
+    public boolean remove(Object o) { // 删除指定的元素
+        if (o == null) { // 如果这个元素是 null
+            for (Node<E> x = first; x != null; x = x.next) { // 从链表的头节点还是遍历查找节点数据是 nell
                 if (x.item == null) {
-                    unlink(x);
+                    unlink(x); // 找到后删除该元素
                     return true;
                 }
             }
@@ -473,8 +473,8 @@ public class LinkedList<E>
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
     public E get(int index) {
-        checkElementIndex(index);
-        return node(index).item;
+        checkElementIndex(index); // 检查要获取的 index 是不是在范围内
+        return node(index).item; // 通过 index 查找节点并返回节点的数据
     }
 
     /**
@@ -504,11 +504,11 @@ public class LinkedList<E>
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
     public void add(int index, E element) {
-        checkPositionIndex(index);
+        checkPositionIndex(index); // 判断要添加的 index 是不是在 0 ~ size 范围内
 
-        if (index == size)
+        if (index == size)// 如果 index = size 说明是尾部添加元素
             linkLast(element);
-        else
+        else // 指定位置添加元素
             linkBefore(element, node(index));
     }
 
@@ -563,9 +563,9 @@ public class LinkedList<E>
     /**
      * Returns the (non-null) Node at the specified element index.
      */
-    Node<E> node(int index) {
+    Node<E> node(int index) {// 找到要插入 index 对应的节点
         // assert isElementIndex(index);
-
+        // 通过判断 index 是在整个链表的前半段还是后半段来确定是从头节点开始遍历查找还是尾结点往前遍历查找，提高效率。
         if (index < (size >> 1)) {
             Node<E> x = first;
             for (int i = 0; i < index; i++)
@@ -592,15 +592,15 @@ public class LinkedList<E>
      * @return the index of the first occurrence of the specified element in
      *         this list, or -1 if this list does not contain the element
      */
-    public int indexOf(Object o) {
-        int index = 0;
-        if (o == null) {
-            for (Node<E> x = first; x != null; x = x.next) {
-                if (x.item == null)
+    public int indexOf(Object o) { // 通过元素获取元素在链表里的索引值。
+        int index = 0; // 初始化 index
+        if (o == null) { // 如果查找的元素是 null
+            for (Node<E> x = first; x != null; x = x.next) { // 从链表的头节点开始查找，查找节点不为 null 的
+                if (x.item == null) // 接着对节点数据进行判断，如果节点数据为 null 则返回相应的 index
                     return index;
                 index++;
             }
-        } else {
+        } else { // 查找的元素不为 null，则遍历查找节点数据与我们要查找的元素相等的。
             for (Node<E> x = first; x != null; x = x.next) {
                 if (o.equals(x.item))
                     return index;
@@ -621,10 +621,10 @@ public class LinkedList<E>
      * @return the index of the last occurrence of the specified element in
      *         this list, or -1 if this list does not contain the element
      */
-    public int lastIndexOf(Object o) {
+    public int lastIndexOf(Object o) { // 由于链表里的元素是可以重复的，所以这个方法是查找元素最后出现的 index
         int index = size;
         if (o == null) {
-            for (Node<E> x = last; x != null; x = x.prev) {
+            for (Node<E> x = last; x != null; x = x.prev) {// 由于我们查找的是元素最后出现的 index，所以为了提高查询效率肯定是从链表尾部开始查找。
                 index--;
                 if (x.item == null)
                     return index;
@@ -636,7 +636,7 @@ public class LinkedList<E>
                     return index;
             }
         }
-        return -1;
+        return -1; // 找不到返回 -1
     }
 
     // Queue operations.
@@ -647,7 +647,7 @@ public class LinkedList<E>
      * @return the head of this list, or {@code null} if this list is empty
      * @since 1.5
      */
-    public E peek() {
+    public E peek() { // 返回链表的头节点，如果没有头节点则返回 null。
         final Node<E> f = first;
         return (f == null) ? null : f.item;
     }
@@ -660,7 +660,7 @@ public class LinkedList<E>
      * @since 1.5
      */
     public E element() {
-        return getFirst();
+        return getFirst(); // 返回链表的头节点，没有则抛出异常。
     }
 
     /**
@@ -681,7 +681,7 @@ public class LinkedList<E>
      * @throws NoSuchElementException if this list is empty
      * @since 1.5
      */
-    public E remove() {
+    public E remove() { // 删除链表的头节点
         return removeFirst();
     }
 
@@ -729,7 +729,7 @@ public class LinkedList<E>
      *         if this list is empty
      * @since 1.6
      */
-    public E peekFirst() {
+    public E peekFirst() { // 获取链表的头节点没有则返回 null。
         final Node<E> f = first;
         return (f == null) ? null : f.item;
      }
@@ -768,7 +768,7 @@ public class LinkedList<E>
      *     this list is empty
      * @since 1.6
      */
-    public E pollLast() {
+    public E pollLast() { //
         final Node<E> l = last;
         return (l == null) ? null : unlinkLast(l);
     }
@@ -973,9 +973,9 @@ public class LinkedList<E>
         Node<E> prev;
 
         Node(Node<E> prev, E element, Node<E> next) {
-            this.item = element;
-            this.next = next;
-            this.prev = prev;
+            this.item = element; // 节点内的数据
+            this.next = next; // 下一个节点
+            this.prev = prev; // 上一个节点
         }
     }
 

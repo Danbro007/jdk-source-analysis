@@ -456,7 +456,7 @@ public class Hashtable<K,V>
      */
     public synchronized V put(K key, V value) {
         // Make sure the value is not null
-        if (value == null) {
+        if (value == null) { // value 为 null 会抛出异常
             throw new NullPointerException();
         }
 

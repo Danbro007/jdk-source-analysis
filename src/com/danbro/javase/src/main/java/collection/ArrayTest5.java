@@ -3,6 +3,9 @@ package collection;
 /**
  * @Classname ArrayTest4
  * @Description TODO
+ *
+ * 测试 System.arraycopy() 方法的实现效果
+ *
  * @Date 2020/8/6 10:18
  * @Author Danrbo
  */
