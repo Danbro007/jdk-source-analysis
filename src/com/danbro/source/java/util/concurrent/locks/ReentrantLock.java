@@ -195,7 +195,7 @@ public class ReentrantLock implements Lock, java.io.Serializable {
     /**
      * Sync object for non-fair locks
      */
-    static final class NonfairSync extends Sync {
+    static final class NonfairSync extends Sync { // 非公平锁
         private static final long serialVersionUID = 7316153563782823691L;
 
         /**
@@ -217,7 +217,7 @@ public class ReentrantLock implements Lock, java.io.Serializable {
     /**
      * Sync object for fair locks
      */
-    static final class FairSync extends Sync {
+    static final class FairSync extends Sync { // 公平锁
         private static final long serialVersionUID = -3000897897090466540L;
 
         final void lock() {
@@ -331,7 +331,7 @@ public class ReentrantLock implements Lock, java.io.Serializable {
      *
      * @throws InterruptedException if the current thread is interrupted
      */
-    public void lockInterruptibly() throws InterruptedException {
+    public void lockInterruptibly() throws InterruptedException { // 够中断等待锁的线程的机制
         sync.acquireInterruptibly(1);
     }
 

@@ -39,37 +39,11 @@ import java.io.ObjectStreamField;
 import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.AbstractMap;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Set;
-import java.util.Spliterator;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ForkJoinPool;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.LockSupport;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
-import java.util.function.BinaryOperator;
-import java.util.function.Consumer;
-import java.util.function.DoubleBinaryOperator;
-import java.util.function.Function;
-import java.util.function.IntBinaryOperator;
-import java.util.function.LongBinaryOperator;
-import java.util.function.ToDoubleBiFunction;
-import java.util.function.ToDoubleFunction;
-import java.util.function.ToIntBiFunction;
-import java.util.function.ToIntFunction;
-import java.util.function.ToLongBiFunction;
-import java.util.function.ToLongFunction;
+import java.util.function.*;
 import java.util.stream.Stream;
 
 /**
@@ -526,7 +500,7 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V>
      * The default concurrency level for this table. Unused but
      * defined for compatibility with previous versions of this class.
      */
-    private static final int DEFAULT_CONCURRENCY_LEVEL = 16;
+    private static final int DEFAULT_CONCURRENCY_LEVEL = 16; // 默认的并发级别
 
     /**
      * The load factor for this table. Overrides of this value in
@@ -792,8 +766,8 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V>
      * creation, or 0 for default. After initialization, holds the
      * next element count value upon which to resize the table.
      */
-    private transient volatile int sizeCtl;
-
+    private transient volatile int sizeCtl; // 用来控制 table 的初始化和扩容的属性。当值为负的，表示这个 table 正在被初始化或者被扩容：-1表示初始化，
+    // 其余的值 -（1 + 活跃的扩容线程数）。否则当 table 是 null，保存创建时使用的初始表大小，默认情况下为0。在初始化之后，保存下一个元素计数值，根据它来调整表的大小。
     /**
      * The next table index (plus one) to split while resizing.
      */
@@ -893,9 +867,9 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V>
                              float loadFactor, int concurrencyLevel) {
         if (!(loadFactor > 0.0f) || initialCapacity < 0 || concurrencyLevel <= 0)
             throw new IllegalArgumentException();
-        if (initialCapacity < concurrencyLevel)   // Use at least as many bins
-            initialCapacity = concurrencyLevel;   // as estimated threads
-        long size = (long)(1.0 + (long)initialCapacity / loadFactor);
+        if (initialCapacity < concurrencyLevel)   // Use at least as many bins  如果初始的容量小于并发级别则把初始容量设置为并发级别
+            initialCapacity = concurrencyLevel;   // as estimated threads  初始容量至少要不小于并发级别
+        long size = (long)(1.0 + (long)initialCapacity / loadFactor); // 算出
         int cap = (size >= (long)MAXIMUM_CAPACITY) ?
             MAXIMUM_CAPACITY : tableSizeFor((int)size);
         this.sizeCtl = cap;
@@ -933,10 +907,10 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V>
      */
     public V get(Object key) {
         Node<K,V>[] tab; Node<K,V> e, p; int n, eh; K ek;
-        int h = spread(key.hashCode());
+        int h = spread(key.hashCode()); // 获取 key 的所在数组的下标
         if ((tab = table) != null && (n = tab.length) > 0 &&
-            (e = tabAt(tab, (n - 1) & h)) != null) {
-            if ((eh = e.hash) == h) {
+            (e = tabAt(tab, (n - 1) & h)) != null) {//
+            if ((eh = e.hash) == h) { // hash 相同
                 if ((ek = e.key) == key || (ek != null && key.equals(ek)))
                     return e.val;
             }
@@ -1008,25 +982,25 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V>
 
     /** Implementation for put and putIfAbsent */
     final V putVal(K key, V value, boolean onlyIfAbsent) {
-        if (key == null || value == null) throw new NullPointerException();
-        int hash = spread(key.hashCode());
+        if (key == null || value == null) throw new NullPointerException(); // 先对 key 和 value 进行 null 判断
+        int hash = spread(key.hashCode());// 获取要存储的数组下标
         int binCount = 0;
         for (Node<K,V>[] tab = table;;) {
             Node<K,V> f; int n, i, fh;
-            if (tab == null || (n = tab.length) == 0)
+            if (tab == null || (n = tab.length) == 0)// 如果 table 为 null 或者 tale 长度为 0 则先创建一个 table 并返回
                 tab = initTable();
-            else if ((f = tabAt(tab, i = (n - 1) & hash)) == null) {
+            else if ((f = tabAt(tab, i = (n - 1) & hash)) == null) { // 获取下标对应的 bin，如果 bin 是 null ，说明此 bin 还没有被添加。
                 if (casTabAt(tab, i, null,
-                             new Node<K,V>(hash, key, value, null)))
+                             new Node<K,V>(hash, key, value, null))) // 因为是空的所以不用加锁，用 cas 创建一个节点并放入索引对应的 bin 上。
                     break;                   // no lock when adding to empty bin
             }
-            else if ((fh = f.hash) == MOVED)
+            else if ((fh = f.hash) == MOVED) // 满足这个条件说明需要扩容
                 tab = helpTransfer(tab, f);
             else {
                 V oldVal = null;
-                synchronized (f) {
-                    if (tabAt(tab, i) == f) {
-                        if (fh >= 0) {
+                synchronized (f) { // 对目标下标的节点加锁
+                    if (tabAt(tab, i) == f) { //
+                        if (fh >= 0) { // 说明是链表
                             binCount = 1;
                             for (Node<K,V> e = f;; ++binCount) {
                                 K ek;
@@ -1047,7 +1021,7 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V>
                             }
                         }
                         else if (f instanceof TreeBin) {
-                            Node<K,V> p;
+                            Node<K,V> p; // 说明红黑树
                             binCount = 2;
                             if ((p = ((TreeBin<K,V>)f).putTreeVal(hash, key,
                                                            value)) != null) {
@@ -2220,24 +2194,24 @@ public class ConcurrentHashMap<K,V> extends AbstractMap<K,V>
     /**
      * Initializes table, using the size recorded in sizeCtl.
      */
-    private final Node<K,V>[] initTable() {
+    private final Node<K,V>[] initTable() { // 初始化 table
         Node<K,V>[] tab; int sc;
-        while ((tab = table) == null || tab.length == 0) {
-            if ((sc = sizeCtl) < 0)
-                Thread.yield(); // lost initialization race; just spin
-            else if (U.compareAndSwapInt(this, SIZECTL, sc, -1)) {
+        while ((tab = table) == null || tab.length == 0) { // 如果 table 为 null 或者 table 长度为 0 说明 table 还没有初始化则一直 while 循环
+            if ((sc = sizeCtl) < 0) // sizeCtl 小于 0 说明另外的线程执行CAS 成功，正在进行初始化。
+                Thread.yield(); // 让出 CPU 使用权
+            else if (U.compareAndSwapInt(this, SIZECTL, sc, -1)) { //说明 sc >= 0 则由当前线程执行 CAS 操作 既把 SIZECTL 成功更新为 -1
                 try {
-                    if ((tab = table) == null || tab.length == 0) {
-                        int n = (sc > 0) ? sc : DEFAULT_CAPACITY;
+                    if ((tab = table) == null || tab.length == 0) { // 如果 table 为 null 或者 table 长度为 0 说明 table 还未初始化
+                        int n = (sc > 0) ? sc : DEFAULT_CAPACITY; // 如果 sc > 0 则把 n 设置为 sc 否则设置为 16
                         @SuppressWarnings("unchecked")
-                        Node<K,V>[] nt = (Node<K,V>[])new Node<?,?>[n];
+                        Node<K,V>[] nt = (Node<K,V>[])new Node<?,?>[n]; // 创建一个新的 table 长度为 n
                         table = tab = nt;
-                        sc = n - (n >>> 2);
+                        sc = n - (n >>> 2); // sc 设置为 n - n / 4
                     }
                 } finally {
-                    sizeCtl = sc;
+                    sizeCtl = sc; // 更新 sizeCtl
                 }
-                break;
+                break; // 跳出循环
             }
         }
         return tab;
