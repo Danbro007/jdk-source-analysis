@@ -62,5 +62,5 @@ public interface Callable<V> {
      * @return computed result
      * @throws Exception if unable to compute a result
      */
-    V call() throws Exception;
+    V call() throws Exception; // 有返回值并且可以抛出异常
 }

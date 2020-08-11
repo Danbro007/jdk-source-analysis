@@ -65,5 +65,5 @@ public interface Runnable {
      *
      * @see     java.lang.Thread#run()
      */
-    public abstract void run();
+    public abstract void run(); // 没有返回值并且不能抛出异常
 }
