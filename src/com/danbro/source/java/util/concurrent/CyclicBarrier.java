@@ -189,24 +189,24 @@ public class CyclicBarrier {
     private void breakBarrier() {
         generation.broken = true;
         count = parties;
-        trip.signalAll();
+        trip.signalAll(); // 通知所有线程
     }
 
     /**
      * Main barrier code, covering the various policies.
      */
-    private int dowait(boolean timed, long nanos)
+    private int dowait(boolean timed, long nanos) // 等待
         throws InterruptedException, BrokenBarrierException,
                TimeoutException {
         final ReentrantLock lock = this.lock;
-        lock.lock();
+        lock.lock(); // 上锁
         try {
             final Generation g = generation;
 
             if (g.broken)
                 throw new BrokenBarrierException();
 
-            if (Thread.interrupted()) {
+            if (Thread.interrupted()) { // 线程被中断
                 breakBarrier();
                 throw new InterruptedException();
             }
@@ -217,7 +217,7 @@ public class CyclicBarrier {
                 try {
                     final Runnable command = barrierCommand;
                     if (command != null)
-                        command.run();
+                        command.run(); // 执行触发屏障的任务
                     ranAction = true;
                     nextGeneration();
                     return 0;
@@ -276,9 +276,9 @@ public class CyclicBarrier {
      */
     public CyclicBarrier(int parties, Runnable barrierAction) {
         if (parties <= 0) throw new IllegalArgumentException();
-        this.parties = parties;
+        this.parties = parties; // 在 barrier 被触发之前满足指定的线程数
         this.count = parties;
-        this.barrierCommand = barrierAction;
+        this.barrierCommand = barrierAction; // 当 barrier 达到后要执行的任务
     }
 
     /**

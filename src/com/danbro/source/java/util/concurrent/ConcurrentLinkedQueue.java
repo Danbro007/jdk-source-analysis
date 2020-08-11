@@ -325,13 +325,13 @@ public class ConcurrentLinkedQueue<E> extends AbstractQueue<E>
      */
     public boolean offer(E e) {
         checkNotNull(e);
-        final Node<E> newNode = new Node<E>(e);
+        final Node<E> newNode = new Node<E>(e); // 添加的元素封装成一个 Node 节点
 
-        for (Node<E> t = tail, p = t;;) {
+        for (Node<E> t = tail, p = t;;) { // 死循环 找到尾节点，把尾节点赋给 p
             Node<E> q = p.next;
-            if (q == null) {
+            if (q == null) { // 说明 p 是最后一个节点
                 // p is last node
-                if (p.casNext(null, newNode)) {
+                if (p.casNext(null, newNode)) { // 使用 Cas 把新节点添加到链表下一个位置
                     // Successful CAS is the linearization point
                     // for e to become an element of this queue,
                     // and for newNode to become "live".

@@ -433,16 +433,16 @@ public class CopyOnWriteArrayList<E>
      */
     public boolean add(E e) {
         final ReentrantLock lock = this.lock;
-        lock.lock();
+        lock.lock(); // 上锁
         try {
-            Object[] elements = getArray();
-            int len = elements.length;
-            Object[] newElements = Arrays.copyOf(elements, len + 1);
-            newElements[len] = e;
-            setArray(newElements);
+            Object[] elements = getArray();// 获取数组
+            int len = elements.length; // 数组长度
+            Object[] newElements = Arrays.copyOf(elements, len + 1); // 拷贝数组，长度为原来长度 + 1。
+            newElements[len] = e; // 在数组尾部放入元素
+            setArray(newElements); // 替换原来的数组
             return true;
         } finally {
-            lock.unlock();
+            lock.unlock(); // 解锁
         }
     }
 

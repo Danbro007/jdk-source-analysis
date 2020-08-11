@@ -225,7 +225,7 @@ public class ArrayBlockingQueue<E> extends AbstractQueue<E>
             if (itrs != null)
                 itrs.removedAt(removeIndex);
         }
-        notFull.signal();
+        notFull.signal(); // 会唤醒一个等待的线程
     }
 
     /**
@@ -236,7 +236,7 @@ public class ArrayBlockingQueue<E> extends AbstractQueue<E>
      * @throws IllegalArgumentException if {@code capacity < 1}
      */
     public ArrayBlockingQueue(int capacity) {
-        this(capacity, false);
+        this(capacity, false); // 默认是非公平的访问策略
     }
 
     /**
@@ -253,7 +253,7 @@ public class ArrayBlockingQueue<E> extends AbstractQueue<E>
         if (capacity <= 0)
             throw new IllegalArgumentException();
         this.items = new Object[capacity];
-        lock = new ReentrantLock(fair);
+        lock = new ReentrantLock(fair); // 公平与否其实是对 ReentrantLock 设置的
         notEmpty = lock.newCondition();
         notFull =  lock.newCondition();
     }
@@ -324,12 +324,12 @@ public class ArrayBlockingQueue<E> extends AbstractQueue<E>
     public boolean offer(E e) {
         checkNotNull(e);
         final ReentrantLock lock = this.lock;
-        lock.lock();
+        lock.lock(); // 加锁
         try {
-            if (count == items.length)
+            if (count == items.length) // 如果队列里的元素数等于队列的长度则返回 false
                 return false;
             else {
-                enqueue(e);
+                enqueue(e); // 添加元素
                 return true;
             }
         } finally {
@@ -349,9 +349,9 @@ public class ArrayBlockingQueue<E> extends AbstractQueue<E>
         final ReentrantLock lock = this.lock;
         lock.lockInterruptibly();
         try {
-            while (count == items.length)
+            while (count == items.length) // 只要队列满了则一直阻塞等待,当有元素被删除时会随机唤醒线程（非公平的）。
                 notFull.await();
-            enqueue(e);
+            enqueue(e);// 队列里有空间了添加元素
         } finally {
             lock.unlock();
         }

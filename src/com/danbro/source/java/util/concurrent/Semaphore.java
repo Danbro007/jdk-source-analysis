@@ -175,9 +175,9 @@ public class Semaphore implements java.io.Serializable {
         }
 
         final int nonfairTryAcquireShared(int acquires) {
-            for (;;) {
-                int available = getState();
-                int remaining = available - acquires;
+            for (;;) {// 死循环
+                int available = getState(); // 获取当前资源数
+                int remaining = available - acquires; // 当前资源数减去要获取的资源数，如果小于 0 或者 Cas 修改资源数成功则返回 remaining
                 if (remaining < 0 ||
                     compareAndSetState(available, remaining))
                     return remaining;
@@ -225,7 +225,7 @@ public class Semaphore implements java.io.Serializable {
             super(permits);
         }
 
-        protected int tryAcquireShared(int acquires) {
+        protected int tryAcquireShared(int acquires) { // 非公平的尝试获取共享资源
             return nonfairTryAcquireShared(acquires);
         }
     }
@@ -261,7 +261,7 @@ public class Semaphore implements java.io.Serializable {
      *        This value may be negative, in which case releases
      *        must occur before any acquires will be granted.
      */
-    public Semaphore(int permits) {
+    public Semaphore(int permits) { // 默认是非公平锁
         sync = new NonfairSync(permits);
     }
 
