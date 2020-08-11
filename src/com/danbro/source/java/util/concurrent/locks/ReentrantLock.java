@@ -712,7 +712,7 @@ public class ReentrantLock implements Lock, java.io.Serializable {
      *         not associated with this lock
      * @throws NullPointerException if the condition is null
      */
-    public int getWaitQueueLength(Condition condition) {
+    public int getWaitQueueLength(Condition condition) { // 返回一个等待与 Condition 相关锁的线程数
         if (condition == null)
             throw new NullPointerException();
         if (!(condition instanceof AbstractQueuedSynchronizer.ConditionObject))

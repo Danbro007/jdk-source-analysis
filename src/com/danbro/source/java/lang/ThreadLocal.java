@@ -157,17 +157,17 @@ public class ThreadLocal<T> {
      * @return the current thread's value of this thread-local
      */
     public T get() {
-        Thread t = Thread.currentThread();
-        ThreadLocalMap map = getMap(t);
-        if (map != null) {
+        Thread t = Thread.currentThread(); // 获取当前线程
+        ThreadLocalMap map = getMap(t); // 获取当前线程的 ThreadLocalMap
+        if (map != null) { // 如果 ThreadLocalMap 存在则到这个 ThreadLocalMap 通过当前 ThreadLocal 对象获取对应的 Entry
             ThreadLocalMap.Entry e = map.getEntry(this);
-            if (e != null) {
+            if (e != null) { // 如果 Entry 不为空则获取这个 Entry 的值并返回
                 @SuppressWarnings("unchecked")
                 T result = (T)e.value;
                 return result;
             }
         }
-        return setInitialValue();
+        return setInitialValue(); // 设置一个 value 为 null 的 Entry 并放入 ThreadLocalMap
     }
 
     /**
@@ -177,10 +177,10 @@ public class ThreadLocal<T> {
      * @return the initial value
      */
     private T setInitialValue() {
-        T value = initialValue();
-        Thread t = Thread.currentThread();
-        ThreadLocalMap map = getMap(t);
-        if (map != null)
+        T value = initialValue(); // 初始化的 value 是 null
+        Thread t = Thread.currentThread(); // 当前线程
+        ThreadLocalMap map = getMap(t);// 获取当前线程的 ThreadLocalMap
+        if (map != null) //
             map.set(this, value);
         else
             createMap(t, value);
@@ -197,12 +197,12 @@ public class ThreadLocal<T> {
      *        this thread-local.
      */
     public void set(T value) {
-        Thread t = Thread.currentThread();
-        ThreadLocalMap map = getMap(t);
-        if (map != null)
-            map.set(this, value);
+        Thread t = Thread.currentThread();// 先获取当前线程
+        ThreadLocalMap map = getMap(t); // 然后到当前线程的 threadLocals 里获取 ThreadLocalMap
+        if (map != null) // 如果 ThreadLocalMap 不为空
+            map.set(this, value); // 则把我们要设置的线程本地变量放入 ThreadLocalMap 里，key 是 ThreadLocal 对象本身，value 是我们要存储的变量
         else
-            createMap(t, value);
+            createMap(t, value);// 说明 ThreadLocalMap 还没创建则创建一个并设置 key(ThreadLocal 对象本身)  value(要存储的变量)
     }
 
     /**
@@ -219,7 +219,7 @@ public class ThreadLocal<T> {
      public void remove() {
          ThreadLocalMap m = getMap(Thread.currentThread());
          if (m != null)
-             m.remove(this);
+             m.remove(this); // 删除 key 为 null 的 Entry
      }
 
     /**
@@ -310,7 +310,7 @@ public class ThreadLocal<T> {
             Object value;
 
             Entry(ThreadLocal<?> k, Object v) {
-                super(k);
+                super(k); // key 是弱引用
                 value = v;
             }
         }
@@ -458,21 +458,21 @@ public class ThreadLocal<T> {
             // it is to replace existing ones, in which case, a fast
             // path would fail more often than not.
 
-            Entry[] tab = table;
-            int len = tab.length;
-            int i = key.threadLocalHashCode & (len-1);
+            Entry[] tab = table;// Entry 数组 存储 ThreadLocal
+            int len = tab.length; // Entry 数组长度
+            int i = key.threadLocalHashCode & (len-1); // 获取 key 对应的 Entry 数组下标
 
-            for (Entry e = tab[i];
+            for (Entry e = tab[i];// 获取 i 对应的 ThreadLocal
                  e != null;
                  e = tab[i = nextIndex(i, len)]) {
-                ThreadLocal<?> k = e.get();
+                ThreadLocal<?> k = e.get();// 找下一个空的位置
 
-                if (k == key) {
+                if (k == key) { // 如果 key 相同则更新 i 的 value
                     e.value = value;
                     return;
                 }
 
-                if (k == null) {
+                if (k == null) { // 初始化一个 Entry 并放在 i 的位置上
                     replaceStaleEntry(key, value, i);
                     return;
                 }
@@ -480,7 +480,7 @@ public class ThreadLocal<T> {
 
             tab[i] = new Entry(key, value);
             int sz = ++size;
-            if (!cleanSomeSlots(i, sz) && sz >= threshold)
+            if (!cleanSomeSlots(i, sz) && sz >= threshold) // 如果容量超过扩容阈值则进行扩容
                 rehash();
         }
 
@@ -495,7 +495,7 @@ public class ThreadLocal<T> {
                  e != null;
                  e = tab[i = nextIndex(i, len)]) {
                 if (e.get() == key) {
-                    e.clear();
+                    e.clear(); // 删除指定的 Entry
                     expungeStaleEntry(i);
                     return;
                 }
