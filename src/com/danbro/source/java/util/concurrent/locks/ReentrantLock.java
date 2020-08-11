@@ -145,16 +145,16 @@ public class ReentrantLock implements Lock, java.io.Serializable {
             return false;
         }
 
-        protected final boolean tryRelease(int releases) {
-            int c = getState() - releases;
-            if (Thread.currentThread() != getExclusiveOwnerThread())
+        protected final boolean tryRelease(int releases) { // 释放锁
+            int c = getState() - releases; // 得到新的 state
+            if (Thread.currentThread() != getExclusiveOwnerThread()) // 如果占用锁的线程不是当前线程则抛出异常
                 throw new IllegalMonitorStateException();
-            boolean free = false;
-            if (c == 0) {
+            boolean free = false; // 锁完全释放的标志位
+            if (c == 0) { // 如果新的 state = 0 则说明锁已经被释放了并且把占用锁的线程设置为 null
                 free = true;
                 setExclusiveOwnerThread(null);
             }
-            setState(c);
+            setState(c); // 更新 state
             return free;
         }
 
@@ -203,10 +203,10 @@ public class ReentrantLock implements Lock, java.io.Serializable {
          * acquire on failure.
          */
         final void lock() {
-            if (compareAndSetState(0, 1))
-                setExclusiveOwnerThread(Thread.currentThread());
+            if (compareAndSetState(0, 1)) // 如果资源数是 0 说明锁还没有被占用，则更新为 1。
+                setExclusiveOwnerThread(Thread.currentThread()); // 占用资源的线程设置为当前线程
             else
-                acquire(1);
+                acquire(1);  // 对 资源数 + 1
         }
 
         protected final boolean tryAcquire(int acquires) {
@@ -228,21 +228,21 @@ public class ReentrantLock implements Lock, java.io.Serializable {
          * Fair version of tryAcquire.  Don't grant access unless
          * recursive call or no waiters or is first.
          */
-        protected final boolean tryAcquire(int acquires) {
-            final Thread current = Thread.currentThread();
-            int c = getState();
-            if (c == 0) {
-                if (!hasQueuedPredecessors() &&
+        protected final boolean tryAcquire(int acquires) { // 尝试获取锁
+            final Thread current = Thread.currentThread(); // 获取当前的线程
+            int c = getState(); // 获取锁的 state
+            if (c == 0) { // 如果状态是 0 则说明目前还没有上锁
+                if (!hasQueuedPredecessors() && // 如果没有其他线程在等待并且用 CAS 更新同步状态成功
                     compareAndSetState(0, acquires)) {
-                    setExclusiveOwnerThread(current);
+                    setExclusiveOwnerThread(current); // 把占用锁的线程设置为当前线程
                     return true;
                 }
             }
-            else if (current == getExclusiveOwnerThread()) {
-                int nextc = c + acquires;
+            else if (current == getExclusiveOwnerThread()) { // 如果占用锁的线程是当前线程
+                int nextc = c + acquires; // 则把 state + 1
                 if (nextc < 0)
                     throw new Error("Maximum lock count exceeded");
-                setState(nextc);
+                setState(nextc); // 更新 state
                 return true;
             }
             return false;
@@ -362,7 +362,7 @@ public class ReentrantLock implements Lock, java.io.Serializable {
      *         thread; and {@code false} otherwise
      */
     public boolean tryLock() {
-        return sync.nonfairTryAcquire(1);
+        return sync.nonfairTryAcquire(1); // 非公平锁
     }
 
     /**
