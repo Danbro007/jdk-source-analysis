@@ -1,85 +1,15 @@
-/*
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- */
+package Multithread.ThreadPool;
 
-/*
- *
- *
- *
- *
- *
- * Written by Doug Lea with assistance from members of JCP JSR-166
- * Expert Group and released to the public domain, as explained at
- * http://creativecommons.org/publicdomain/zero/1.0/
- */
-
-package java.util.concurrent;
-
+import java.util.*;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.AbstractQueue;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
-import java.util.Spliterator;
-import java.util.Spliterators;
 import java.util.function.Consumer;
 
-/**
- * An optionally-bounded {@linkplain BlockingQueue blocking queue} based on
- * linked nodes.
- * This queue orders elements FIFO (first-in-first-out).
- * The <em>head</em> of the queue is that element that has been on the
- * queue the longest time.
- * The <em>tail</em> of the queue is that element that has been on the
- * queue the shortest time. New elements
- * are inserted at the tail of the queue, and the queue retrieval
- * operations obtain elements at the head of the queue.
- * Linked queues typically have higher throughput than array-based queues but
- * less predictable performance in most concurrent applications.
- *
- * <p>The optional capacity bound constructor argument serves as a
- * way to prevent excessive queue expansion. The capacity, if unspecified,
- * is equal to {@link Integer#MAX_VALUE}.  Linked nodes are
- * dynamically created upon each insertion unless this would bring the
- * queue above capacity.
- *
- * <p>This class and its iterator implement all of the
- * <em>optional</em> methods of the {@link Collection} and {@link
- * Iterator} interfaces.
- *
- * <p>This class is a member of the
- * <a href="{@docRoot}/../technotes/guides/collections/index.html">
- * Java Collections Framework</a>.
- *
- * @since 1.5
- * @author Doug Lea
- * @param <E> the type of elements held in this collection
- */
-public class LinkedBlockingQueue<E> extends AbstractQueue<E>
+public class MyLinkedBlockingQueue<E> extends AbstractQueue<E>
         implements BlockingQueue<E>, java.io.Serializable {
-    private static final long serialVersionUID = -6903933977591709194L;
 
     /*
      * A variant of the "two lock queue" algorithm.  The putLock gates
@@ -134,7 +64,7 @@ public class LinkedBlockingQueue<E> extends AbstractQueue<E>
     }
 
     /** The capacity bound, or Integer.MAX_VALUE if none */
-    private final int capacity;
+    private  int capacity;
 
     /** Current number of elements */
     private final AtomicInteger count = new AtomicInteger();
@@ -144,6 +74,14 @@ public class LinkedBlockingQueue<E> extends AbstractQueue<E>
      * Invariant: head.item == null
      */
     transient Node<E> head;
+
+    public int getCapacity() {
+        return capacity;
+    }
+
+    public void setCapacity(int capacity) {
+        this.capacity = capacity;
+    }
 
     /**
      * Tail of linked list.
@@ -243,28 +181,28 @@ public class LinkedBlockingQueue<E> extends AbstractQueue<E>
 //     }
 
     /**
-     * Creates a {@code LinkedBlockingQueue} with a capacity of
+     * Creates a {@code MyLinkedBlockingQueue} with a capacity of
      * {@link Integer#MAX_VALUE}.
      */
-    public LinkedBlockingQueue() {
+    public MyLinkedBlockingQueue() {
         this(Integer.MAX_VALUE); // 不指定阻塞队列大小默认是Integer.MAX_VALUE
     }
 
     /**
-     * Creates a {@code LinkedBlockingQueue} with the given (fixed) capacity.
+     * Creates a {@code MyLinkedBlockingQueue} with the given (fixed) capacity.
      *
      * @param capacity the capacity of this queue
      * @throws IllegalArgumentException if {@code capacity} is not greater
      *         than zero
      */
-    public LinkedBlockingQueue(int capacity) { // 指定队列大小的构造器
+    public MyLinkedBlockingQueue(int capacity) { // 指定队列大小的构造器
         if (capacity <= 0) throw new IllegalArgumentException();
         this.capacity = capacity;
         last = head = new Node<E>(null);
     }
 
     /**
-     * Creates a {@code LinkedBlockingQueue} with a capacity of
+     * Creates a {@code MyLinkedBlockingQueue} with a capacity of
      * {@link Integer#MAX_VALUE}, initially containing the elements of the
      * given collection,
      * added in traversal order of the collection's iterator.
@@ -273,7 +211,7 @@ public class LinkedBlockingQueue<E> extends AbstractQueue<E>
      * @throws NullPointerException if the specified collection or any
      *         of its elements are null
      */
-    public LinkedBlockingQueue(Collection<? extends E> c) {
+    public MyLinkedBlockingQueue(Collection<? extends E> c) {
         this(Integer.MAX_VALUE);
         final ReentrantLock putLock = this.putLock;
         putLock.lock(); // Never contended, but necessary for visibility
@@ -370,7 +308,7 @@ public class LinkedBlockingQueue<E> extends AbstractQueue<E>
      * @throws NullPointerException {@inheritDoc}
      */
     public boolean offer(E e, long timeout, TimeUnit unit)
-        throws InterruptedException {
+            throws InterruptedException {
 
         if (e == null) throw new NullPointerException();
         long nanos = unit.toNanos(timeout);
@@ -651,7 +589,7 @@ public class LinkedBlockingQueue<E> extends AbstractQueue<E>
             int size = count.get();
             if (a.length < size)
                 a = (T[])java.lang.reflect.Array.newInstance
-                    (a.getClass().getComponentType(), size);
+                        (a.getClass().getComponentType(), size);
 
             int k = 0;
             for (Node<E> p = head.next; p != null; p = p.next)
@@ -858,12 +796,12 @@ public class LinkedBlockingQueue<E> extends AbstractQueue<E>
     /** A customized variant of Spliterators.IteratorSpliterator */
     static final class LBQSpliterator<E> implements Spliterator<E> {
         static final int MAX_BATCH = 1 << 25;  // max batch array size;
-        final LinkedBlockingQueue<E> queue;
+        final MyLinkedBlockingQueue<E> queue;
         Node<E> current;    // current node; null until initialized
         int batch;          // batch size for splits
         boolean exhausted;  // true when no more nodes
         long est;           // size estimate
-        LBQSpliterator(LinkedBlockingQueue<E> queue) {
+        LBQSpliterator(MyLinkedBlockingQueue<E> queue) {
             this.queue = queue;
             this.est = queue.size();
         }
@@ -872,12 +810,12 @@ public class LinkedBlockingQueue<E> extends AbstractQueue<E>
 
         public Spliterator<E> trySplit() {
             Node<E> h;
-            final LinkedBlockingQueue<E> q = this.queue;
+            final MyLinkedBlockingQueue<E> q = this.queue;
             int b = batch;
             int n = (b <= 0) ? 1 : (b >= MAX_BATCH) ? MAX_BATCH : b + 1;
             if (!exhausted &&
-                ((h = current) != null || (h = q.head.next) != null) &&
-                h.next != null) {
+                    ((h = current) != null || (h = q.head.next) != null) &&
+                    h.next != null) {
                 Object[] a = new Object[n];
                 int i = 0;
                 Node<E> p = current;
@@ -901,8 +839,8 @@ public class LinkedBlockingQueue<E> extends AbstractQueue<E>
                 if (i > 0) {
                     batch = i;
                     return Spliterators.spliterator
-                        (a, 0, i, Spliterator.ORDERED | Spliterator.NONNULL |
-                         Spliterator.CONCURRENT);
+                            (a, 0, i, Spliterator.ORDERED | Spliterator.NONNULL |
+                                    Spliterator.CONCURRENT);
                 }
             }
             return null;
@@ -910,7 +848,7 @@ public class LinkedBlockingQueue<E> extends AbstractQueue<E>
 
         public void forEachRemaining(Consumer<? super E> action) {
             if (action == null) throw new NullPointerException();
-            final LinkedBlockingQueue<E> q = this.queue;
+            final MyLinkedBlockingQueue<E> q = this.queue;
             if (!exhausted) {
                 exhausted = true;
                 Node<E> p = current;
@@ -937,7 +875,7 @@ public class LinkedBlockingQueue<E> extends AbstractQueue<E>
 
         public boolean tryAdvance(Consumer<? super E> action) {
             if (action == null) throw new NullPointerException();
-            final LinkedBlockingQueue<E> q = this.queue;
+            final MyLinkedBlockingQueue<E> q = this.queue;
             if (!exhausted) {
                 E e = null;
                 q.fullyLock();
@@ -965,7 +903,7 @@ public class LinkedBlockingQueue<E> extends AbstractQueue<E>
 
         public int characteristics() {
             return Spliterator.ORDERED | Spliterator.NONNULL |
-                Spliterator.CONCURRENT;
+                    Spliterator.CONCURRENT;
         }
     }
 
@@ -999,7 +937,7 @@ public class LinkedBlockingQueue<E> extends AbstractQueue<E>
      * followed by a null
      */
     private void writeObject(java.io.ObjectOutputStream s)
-        throws java.io.IOException {
+            throws java.io.IOException {
 
         fullyLock();
         try {
@@ -1025,7 +963,7 @@ public class LinkedBlockingQueue<E> extends AbstractQueue<E>
      * @throws java.io.IOException if an I/O error occurs
      */
     private void readObject(java.io.ObjectInputStream s)
-        throws java.io.IOException, ClassNotFoundException {
+            throws java.io.IOException, ClassNotFoundException {
         // Read in capacity, and any hidden stuff
         s.defaultReadObject();
 

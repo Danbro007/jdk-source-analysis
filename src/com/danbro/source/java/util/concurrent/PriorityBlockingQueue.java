@@ -35,20 +35,12 @@
 
 package java.util.concurrent;
 
+import sun.misc.SharedSecrets;
+
+import java.util.*;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.AbstractQueue;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
-import java.util.PriorityQueue;
-import java.util.Queue;
-import java.util.SortedSet;
-import java.util.Spliterator;
 import java.util.function.Consumer;
-import sun.misc.SharedSecrets;
 
 /**
  * An unbounded {@linkplain BlockingQueue blocking queue} that uses
@@ -491,7 +483,7 @@ public class PriorityBlockingQueue<E> extends AbstractQueue<E>
             else
                 siftUpUsingComparator(n, e, array, cmp);
             size = n + 1;
-            notEmpty.signal();
+            notEmpty.signal(); // 随机唤醒一个线程去取元素
         } finally {
             lock.unlock();
         }
@@ -547,7 +539,7 @@ public class PriorityBlockingQueue<E> extends AbstractQueue<E>
         E result;
         try {
             while ( (result = dequeue()) == null)
-                notEmpty.await();
+                notEmpty.await(); // 队列空了则一直阻塞在这里
         } finally {
             lock.unlock();
         }

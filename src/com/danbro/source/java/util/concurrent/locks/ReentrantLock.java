@@ -126,10 +126,10 @@ public class ReentrantLock implements Lock, java.io.Serializable {
          * Performs non-fair tryLock.  tryAcquire is implemented in
          * subclasses, but both need nonfair try for trylock method.
          */
-        final boolean nonfairTryAcquire(int acquires) { // 非公平获取
+        final boolean nonfairTryAcquire(int acquires) { // 非公平获取锁
             final Thread current = Thread.currentThread();
             int c = getState();
-            if (c == 0) {
+            if (c == 0) { // Cas 失败后会在这里再次尝试上锁
                 if (compareAndSetState(0, acquires)) {
                     setExclusiveOwnerThread(current);
                     return true;
@@ -202,11 +202,11 @@ public class ReentrantLock implements Lock, java.io.Serializable {
          * Performs lock.  Try immediate barge, backing up to normal
          * acquire on failure.
          */
-        final void lock() {
+        final void lock() { // 非公平锁当尝试上锁时会用立即尝试用 Cas 占用锁，如果失败则把进入等待线程等待。
             if (compareAndSetState(0, 1)) // 如果资源数是 0 说明锁还没有被占用，则更新为 1。
                 setExclusiveOwnerThread(Thread.currentThread()); // 占用资源的线程设置为当前线程
             else
-                acquire(1);  // 对 资源数 + 1
+                acquire(1);  // 对资源数 + 1
         }
 
         protected final boolean tryAcquire(int acquires) {
@@ -228,17 +228,17 @@ public class ReentrantLock implements Lock, java.io.Serializable {
          * Fair version of tryAcquire.  Don't grant access unless
          * recursive call or no waiters or is first.
          */
-        protected final boolean tryAcquire(int acquires) { // 尝试获取锁
+        protected final boolean tryAcquire(int acquires) { // 公平锁尝试获取锁，如果等待队列里没有其他线程等待则用 Cas 获取锁
             final Thread current = Thread.currentThread(); // 获取当前的线程
             int c = getState(); // 获取锁的 state
-            if (c == 0) { // 如果状态是 0 则说明目前还没有上锁
-                if (!hasQueuedPredecessors() && // 如果没有其他线程在等待并且用 CAS 更新同步状态成功
+            if (c == 0) { // 如果状态是 0 则说明目前还没有线程占用锁
+                if (!hasQueuedPredecessors() && // 如果没有其他线程在等待并且用 CAS 更新同步状态成功，如果失败说明同一时刻有其他线程抢先了
                     compareAndSetState(0, acquires)) {
                     setExclusiveOwnerThread(current); // 把占用锁的线程设置为当前线程
                     return true;
                 }
             }
-            else if (current == getExclusiveOwnerThread()) { // 如果占用锁的线程是当前线程
+            else if (current == getExclusiveOwnerThread()) { // 如果占用锁的线程是当前线程，既是重入锁
                 int nextc = c + acquires; // 则把 state + 1
                 if (nextc < 0)
                     throw new Error("Maximum lock count exceeded");

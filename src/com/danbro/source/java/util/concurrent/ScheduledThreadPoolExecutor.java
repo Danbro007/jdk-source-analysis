@@ -34,11 +34,12 @@
  */
 
 package java.util.concurrent;
-import static java.util.concurrent.TimeUnit.NANOSECONDS;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.*;
+
+import static java.util.concurrent.TimeUnit.NANOSECONDS;
 
 /**
  * A {@link ThreadPoolExecutor} that can additionally schedule
@@ -426,7 +427,7 @@ public class ScheduledThreadPoolExecutor
      *        if they are idle, unless {@code allowCoreThreadTimeOut} is set
      * @throws IllegalArgumentException if {@code corePoolSize < 0}
      */
-    public ScheduledThreadPoolExecutor(int corePoolSize) {
+    public ScheduledThreadPoolExecutor(int corePoolSize) { // 线程数不限制，容易 OOM。
         super(corePoolSize, Integer.MAX_VALUE, 0, NANOSECONDS,
               new DelayedWorkQueue());
     }

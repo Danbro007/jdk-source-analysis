@@ -34,15 +34,12 @@
  */
 
 package java.util.concurrent;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.security.AccessControlContext;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-import java.security.PrivilegedExceptionAction;
-import java.security.PrivilegedActionException;
-import java.security.AccessControlException;
 import sun.security.util.SecurityConstants;
+
+import java.security.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Factory and utility methods for {@link Executor}, {@link
@@ -88,7 +85,7 @@ public class Executors {
     public static ExecutorService newFixedThreadPool(int nThreads) {
         return new ThreadPoolExecutor(nThreads, nThreads,
                                       0L, TimeUnit.MILLISECONDS,
-                                      new LinkedBlockingQueue<Runnable>());
+                                      new LinkedBlockingQueue<Runnable>()); // 阻塞队列默认的最大长度为 Integer.MAX_VALUE
     }
 
     /**
@@ -213,7 +210,7 @@ public class Executors {
      * @return the newly created thread pool
      */
     public static ExecutorService newCachedThreadPool() {
-        return new ThreadPoolExecutor(0, Integer.MAX_VALUE,
+        return new ThreadPoolExecutor(0, Integer.MAX_VALUE, // 线程池容量为 Integer.MAX_VALUE 会造成 OOM
                                       60L, TimeUnit.SECONDS,
                                       new SynchronousQueue<Runnable>());
     }

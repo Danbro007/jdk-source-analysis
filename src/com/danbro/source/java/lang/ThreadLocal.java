@@ -347,7 +347,7 @@ public class ThreadLocal<T> {
          * Increment i modulo len.
          */
         private static int nextIndex(int i, int len) {
-            return ((i + 1 < len) ? i + 1 : 0);
+            return ((i + 1 < len) ? i + 1 : 0); // 如果 i + 1 还小于数组长度则返回 i + 1 否则返回 0
         }
 
         /**
@@ -411,12 +411,12 @@ public class ThreadLocal<T> {
          * @return the entry associated with key, or null if no such
          */
         private Entry getEntry(ThreadLocal<?> key) {
-            int i = key.threadLocalHashCode & (table.length - 1);
-            Entry e = table[i];
-            if (e != null && e.get() == key)
+            int i = key.threadLocalHashCode & (table.length - 1); // 获取下标
+            Entry e = table[i]; // 获取下标对应的 Entry
+            if (e != null && e.get() == key) // Entry 存在并且 key 相同则返回
                 return e;
             else
-                return getEntryAfterMiss(key, i, e);
+                return getEntryAfterMiss(key, i, e); // 往后迭代查找
         }
 
         /**
@@ -434,12 +434,12 @@ public class ThreadLocal<T> {
 
             while (e != null) {
                 ThreadLocal<?> k = e.get();
-                if (k == key)
+                if (k == key) // key 相同返回
                     return e;
-                if (k == null)
+                if (k == null) // 删除过期的 Entry，i 之后的 Entry 往前移动
                     expungeStaleEntry(i);
                 else
-                    i = nextIndex(i, len);
+                    i = nextIndex(i, len); // i + 1
                 e = tab[i];
             }
             return null;
@@ -458,29 +458,29 @@ public class ThreadLocal<T> {
             // it is to replace existing ones, in which case, a fast
             // path would fail more often than not.
 
-            Entry[] tab = table;// Entry 数组 存储 ThreadLocal
+            Entry[] tab = table;// Entry 数组 存储 Entry<ThreadLocal,value>
             int len = tab.length; // Entry 数组长度
             int i = key.threadLocalHashCode & (len-1); // 获取 key 对应的 Entry 数组下标
-
-            for (Entry e = tab[i];// 获取 i 对应的 ThreadLocal
-                 e != null;
+            // 解决可能会有的哈希冲突
+            for (Entry e = tab[i];// 从 i 下标对应的 Entry 开始往后查找，直到 Entry 为 null。
+                 e != null; //
                  e = tab[i = nextIndex(i, len)]) {
-                ThreadLocal<?> k = e.get();// 找下一个空的位置
+                ThreadLocal<?> k = e.get();// 获取 ThreadLocal 对象
 
-                if (k == key) { // 如果 key 相同则更新 i 的 value
+                if (k == key) { // 如果 key 相同则更新它的 value
                     e.value = value;
                     return;
                 }
 
-                if (k == null) { // 初始化一个 Entry 并放在 i 的位置上
+                if (k == null) { //说明存在 Entry 但是 key 为 null，key 过期了并且被 GC 回收了，则创建一个新的 Entry 并替代原来的
                     replaceStaleEntry(key, value, i);
                     return;
                 }
             }
-
+            // 说明当前的位置上没有 Entry 则创建一个新的 Entry
             tab[i] = new Entry(key, value);
-            int sz = ++size;
-            if (!cleanSomeSlots(i, sz) && sz >= threshold) // 如果容量超过扩容阈值则进行扩容
+            int sz = ++size; // 元素数 + 1
+            if (!cleanSomeSlots(i, sz) && sz >= threshold) // 如果没有清理掉任何过期的 Entry 并且容量超过扩容阈值（size 的 2/3）则对 Entry 进行重新哈希
                 rehash();
         }
 
@@ -523,12 +523,12 @@ public class ThreadLocal<T> {
             int len = tab.length;
             Entry e;
 
-            // Back up to check for prior stale entry in current run.
+            // back up to check for prior stale entry in current run.
             // We clean out whole runs at a time to avoid continual
             // incremental rehashing due to garbage collector freeing
             // up refs in bunches (i.e., whenever the collector runs).
             int slotToExpunge = staleSlot;
-            for (int i = prevIndex(staleSlot, len);
+            for (int i = prevIndex(staleSlot, len); // 从 staleSlot 的位置往前遍历，直到 Entry 为 null，则把这个 Entry 前一个 Entry 的 index 记录为 slotToExpunge
                  (e = tab[i]) != null;
                  i = prevIndex(i, len))
                 if (e.get() == null)
@@ -536,8 +536,8 @@ public class ThreadLocal<T> {
 
             // Find either the key or trailing null slot of run, whichever
             // occurs first
-            for (int i = nextIndex(staleSlot, len);
-                 (e = tab[i]) != null;
+            for (int i = nextIndex(staleSlot, len); // 从 staleSlot 开始往后查找，直到 Entry 为 null
+                 (e = tab[i]) != null; // 在这期间如果遇到 key 相同的 Entry 则更新它的 value
                  i = nextIndex(i, len)) {
                 ThreadLocal<?> k = e.get();
 
@@ -546,14 +546,14 @@ public class ThreadLocal<T> {
                 // The newly stale slot, or any other stale slot
                 // encountered above it, can then be sent to expungeStaleEntry
                 // to remove or rehash all of the other entries in run.
-                if (k == key) {
+                if (k == key) { // 如果遇到 key 相同的 Entry 则更新 value，然后交换 staleSlot 的 Entry 和 i 的 Entry 的位置
                     e.value = value;
 
                     tab[i] = tab[staleSlot];
                     tab[staleSlot] = e;
 
                     // Start expunge at preceding stale entry if it exists
-                    if (slotToExpunge == staleSlot)
+                    if (slotToExpunge == staleSlot) // 如果要替代的 Entry 的 index 和 Entry 为 null 的 index 相同则把 slotToExpunge 更新为 i
                         slotToExpunge = i;
                     cleanSomeSlots(expungeStaleEntry(slotToExpunge), len);
                     return;
@@ -590,7 +590,7 @@ public class ThreadLocal<T> {
             Entry[] tab = table;
             int len = tab.length;
 
-            // expunge entry at staleSlot
+            //将过期的 Entry 设置为 null 相当于删除
             tab[staleSlot].value = null;
             tab[staleSlot] = null;
             size--;
@@ -598,22 +598,22 @@ public class ThreadLocal<T> {
             // Rehash until we encounter null
             Entry e;
             int i;
-            for (i = nextIndex(staleSlot, len);
+            for (i = nextIndex(staleSlot, len);// 从 staleSlot 往后开始到遇到 Entry 为 null 之间遍历
                  (e = tab[i]) != null;
                  i = nextIndex(i, len)) {
                 ThreadLocal<?> k = e.get();
-                if (k == null) {
+                if (k == null) { // 如果 Entry 过期了既 key 为 null 则设置为 null 删除它
                     e.value = null;
                     tab[i] = null;
                     size--;
-                } else {
-                    int h = k.threadLocalHashCode & (len - 1);
-                    if (h != i) {
+                } else { // 说明 Entry 没过期
+                    int h = k.threadLocalHashCode & (len - 1); // 重新哈希 Entry
+                    if (h != i) { // 如果 index 有变化则把原来的 index 对应的 Entry 删除
                         tab[i] = null;
 
                         // Unlike Knuth 6.4 Algorithm R, we must scan until
                         // null because multiple entries could have been stale.
-                        while (tab[h] != null)
+                        while (tab[h] != null) // 如果新的 index 存在 Entry 则往后找直到 Entry 为 null
                             h = nextIndex(h, len);
                         tab[h] = e;
                     }
@@ -667,12 +667,12 @@ public class ThreadLocal<T> {
          * table removing stale entries. If this doesn't sufficiently
          * shrink the size of the table, double the table size.
          */
-        private void rehash() {
-            expungeStaleEntries();
+        private void rehash() { // 重新哈希
+            expungeStaleEntries(); // 清理过期的 Entry 并重新哈希 Entry
 
             // Use lower threshold for doubling to avoid hysteresis
-            if (size >= threshold - threshold / 4)
-                resize();
+            if (size >= threshold - threshold / 4) // 如果元素数大于等于 threshold 的 3/4
+                resize(); // 扩容
         }
 
         /**
@@ -681,17 +681,17 @@ public class ThreadLocal<T> {
         private void resize() {
             Entry[] oldTab = table;
             int oldLen = oldTab.length;
-            int newLen = oldLen * 2;
+            int newLen = oldLen * 2 ; // 新的容量为原来的两倍
             Entry[] newTab = new Entry[newLen];
             int count = 0;
 
-            for (int j = 0; j < oldLen; ++j) {
-                Entry e = oldTab[j];
+            for (int j = 0; j < oldLen; ++j) { // 遍历老的数组，放入新的数组里
+                Entry e = oldTab[j];  //
                 if (e != null) {
                     ThreadLocal<?> k = e.get();
-                    if (k == null) {
+                    if (k == null) { // 如果遇到过期的 Entry 则把过期的删除
                         e.value = null; // Help the GC
-                    } else {
+                    } else { // 如果没过期则重新哈希 key 获取新的数组下标，如果新的下标有 Entry 则到新下标后面找直到 Entry 为 null 的
                         int h = k.threadLocalHashCode & (newLen - 1);
                         while (newTab[h] != null)
                             h = nextIndex(h, newLen);
@@ -701,8 +701,8 @@ public class ThreadLocal<T> {
                 }
             }
 
-            setThreshold(newLen);
-            size = count;
+            setThreshold(newLen); // 设置新的扩容阈值
+            size = count; // 更新数组
             table = newTab;
         }
 
@@ -712,10 +712,10 @@ public class ThreadLocal<T> {
         private void expungeStaleEntries() {
             Entry[] tab = table;
             int len = tab.length;
-            for (int j = 0; j < len; j++) {
+            for (int j = 0; j < len; j++) { // 遍历这个 table
                 Entry e = tab[j];
-                if (e != null && e.get() == null)
-                    expungeStaleEntry(j);
+                if (e != null && e.get() == null) // 如果碰到过期的 Entry
+                    expungeStaleEntry(j); // 清除过期的 Entry 并重新哈希其他未过期的 Entry
             }
         }
     }
