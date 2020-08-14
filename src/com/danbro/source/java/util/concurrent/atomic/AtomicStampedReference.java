@@ -100,10 +100,10 @@ public class AtomicStampedReference<V> {
      * {@code stampholder[0]} will hold the value of the stamp.
      * @return the current value of the reference
      */
-    public V get(int[] stampHolder) {
-        Pair<V> pair = this.pair;
-        stampHolder[0] = pair.stamp;
-        return pair.reference;
+    public V get(int[] stampHolder) { // 返回当前原子类的 reference 和 stamp，通常使用方法是创建一个只有一个元素的数组。如：int[1]，然后用 get() 方法把 stamp 放入这个数组并返回 reference
+        Pair<V> pair = this.pair; // Pair 是对 reference 和 stamp 的封装
+        stampHolder[0] = pair.stamp; // 把 stampHolder[0] 设置为 stamp
+        return pair.reference; // 返回 reference
     }
 
     /**
