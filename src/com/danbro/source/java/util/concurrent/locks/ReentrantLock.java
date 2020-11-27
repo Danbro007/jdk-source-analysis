@@ -125,17 +125,27 @@ public class ReentrantLock implements Lock, java.io.Serializable {
         /**
          * Performs non-fair tryLock.  tryAcquire is implemented in
          * subclasses, but both need nonfair try for trylock method.
+         *
+         * 非公平尝试获取锁：
+         *  1、如果还没有上锁则当前线程会先尝试上锁，上锁成功则返回 true。
+         *  2、如果已经上锁了但是占用锁的线程是当前的线程则会对 state 自增 + acquires 并更新 state 状态（可重入锁），然后返回 true。
+         *  3、其余情况返回 false。
+         *
          */
-        final boolean nonfairTryAcquire(int acquires) { // 非公平获取锁
+        final boolean nonfairTryAcquire(int acquires) {
             final Thread current = Thread.currentThread();
+            // 获取锁状态，如果状态是 0 说明还没有上锁，则先尝试获取锁。
             int c = getState();
-            if (c == 0) { // Cas 失败后会在这里再次尝试上锁
+            if (c == 0) {
+                // 尝试上锁
                 if (compareAndSetState(0, acquires)) {
+                    // 到这里说明当前线程获取到独占锁了
                     setExclusiveOwnerThread(current);
                     return true;
                 }
             }
             else if (current == getExclusiveOwnerThread()) { // 如果当前线程是占用资源锁的线程
+                // 可重入锁，锁计数器加 1 并更新状态
                 int nextc = c + acquires; // state + acquires
                 if (nextc < 0) // overflow
                     throw new Error("Maximum lock count exceeded");
@@ -201,12 +211,18 @@ public class ReentrantLock implements Lock, java.io.Serializable {
         /**
          * Performs lock.  Try immediate barge, backing up to normal
          * acquire on failure.
+         *
+         * 非公平锁当尝试上锁时会用立即尝试用 Cas 占用锁，如果失败则会和公平锁一样进入等待队列等待。
+         *
          */
-        final void lock() { // 非公平锁当尝试上锁时会用立即尝试用 Cas 占用锁，如果失败则把进入等待线程等待。
-            if (compareAndSetState(0, 1)) // 如果资源数是 0 说明锁还没有被占用，则更新为 1。
-                setExclusiveOwnerThread(Thread.currentThread()); // 占用资源的线程设置为当前线程
+        final void lock() {
+            // 如果资源数是 0 说明锁还没有被占用，则更新为 1。
+            if (compareAndSetState(0, 1))
+                // 占用资源的线程设置为当前线程
+                setExclusiveOwnerThread(Thread.currentThread());
             else
-                acquire(1);  // 对资源数 + 1
+                // 进入等待队列
+                acquire(1);
         }
 
         protected final boolean tryAcquire(int acquires) {

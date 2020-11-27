@@ -34,7 +34,6 @@
  */
 
 package java.util.concurrent.locks;
-import sun.misc.Unsafe;
 
 /**
  * Basic thread blocking primitives for creating locks and other
@@ -132,6 +131,11 @@ public class LockSupport {
      * to {@code park} is guaranteed not to block. This operation
      * is not guaranteed to have any effect at all if the given
      * thread has not been started.
+     *
+     * 给当前线程一个可用的许可证。如果当前线程被 park 方法阻塞住了，使用 unpark 方法则会解除阻塞。
+     * 否则在先使用 unpark 的情况下调用 park 方法则线程不会被阻塞。如果给定的线程没有开始启动，则使用这个 unpark 方法
+     * 不会起作用。
+     *
      *
      * @param thread the thread to unpark, or {@code null}, in which case
      *        this operation has no effect

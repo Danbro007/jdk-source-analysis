@@ -99,7 +99,7 @@ public class BufferedReader extends Reader {
      */
     public BufferedReader(Reader in, int sz) {
         super(in);
-        if (sz <= 0)
+        if (sz <= 0) // 缓冲区大小
             throw new IllegalArgumentException("Buffer size <= 0");
         this.in = in;
         cb = new char[sz];
