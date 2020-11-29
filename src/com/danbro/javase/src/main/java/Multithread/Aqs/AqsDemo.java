@@ -15,35 +15,45 @@ public class AqsDemo {
     @SneakyThrows
     public static void main(String[] args) {
         ReentrantLock lock = new ReentrantLock();
-        Thread a = new Thread((() -> {
+        new Thread(() -> {
             lock.lock();
             try {
-                TimeUnit.MINUTES.sleep(20);
+                System.out.println(String.format("线程【%s】获取到锁", Thread.currentThread().getId()));
+                TimeUnit.SECONDS.sleep(1);
             } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            finally {
+                System.out.println(String.format("线程【%s】释放锁", Thread.currentThread().getId()));
                 lock.unlock();
             }
-        }));
-        a.start();
-        TimeUnit.SECONDS.sleep(1);
-        Thread b = new Thread((() -> {
+        }).start();
+        new Thread(() -> {
             lock.lock();
             try {
-                TimeUnit.MINUTES.sleep(20);
+                System.out.println(String.format("线程【%s】获取到锁", Thread.currentThread().getId()));
+                TimeUnit.SECONDS.sleep(1);
             } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            finally {
+                System.out.println(String.format("线程【%s】释放锁", Thread.currentThread().getId()));
                 lock.unlock();
             }
-        }));
-        b.start();
-        TimeUnit.SECONDS.sleep(1);
-        Thread c = new Thread((() -> {
+        }).start();
+        new Thread(() -> {
             lock.lock();
             try {
-                TimeUnit.MINUTES.sleep(20);
+                System.out.println(String.format("线程【%s】获取到锁", Thread.currentThread().getId()));
+                TimeUnit.SECONDS.sleep(1);
             } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            finally {
+                System.out.println(String.format("线程【%s】释放锁", Thread.currentThread().getId()));
                 lock.unlock();
             }
-        }));
-        c.start();
+        }).start();
 
     }
 }

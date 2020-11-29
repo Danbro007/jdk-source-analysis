@@ -685,7 +685,7 @@ public abstract class AbstractQueuedSynchronizer
                     s = t;
         }
         if (s != null)
-            // 唤醒找到的后继节点
+            // 唤醒找到的后继节点唤醒它
             LockSupport.unpark(s.thread);
     }
 
