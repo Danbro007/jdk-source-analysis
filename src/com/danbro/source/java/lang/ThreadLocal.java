@@ -161,7 +161,7 @@ public class ThreadLocal<T> {
         ThreadLocalMap map = getMap(t); // 获取当前线程的 ThreadLocalMap
         if (map != null) { // 如果 ThreadLocalMap 存在则到这个 ThreadLocalMap 通过当前 ThreadLocal 对象获取对应的 Entry
             ThreadLocalMap.Entry e = map.getEntry(this);
-            if (e != null) { // 如果 Entry 不为空则获取这个 Entry 的值并返回
+            if (e != null) { // 如果 Entry 不为空则获取这个 Entry 的 value 并返回
                 @SuppressWarnings("unchecked")
                 T result = (T)e.value;
                 return result;
@@ -555,6 +555,7 @@ public class ThreadLocal<T> {
                     // Start expunge at preceding stale entry if it exists
                     if (slotToExpunge == staleSlot) // 如果要替代的 Entry 的 index 和 Entry 为 null 的 index 相同则把 slotToExpunge 更新为 i
                         slotToExpunge = i;
+                    // 清除 key 为 null 的 Entry 的 value
                     cleanSomeSlots(expungeStaleEntry(slotToExpunge), len);
                     return;
                 }

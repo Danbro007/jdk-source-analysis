@@ -11,7 +11,6 @@ import java.util.Random;
  */
 public class ThreadLocalTest1 implements Runnable{
     private static final ThreadLocal<SimpleDateFormat> FORMAT_THREAD_LOCAL = ThreadLocal.withInitial(()->new SimpleDateFormat("yyyyMMdd HHmm"));
-
     public static void main(String[] args) throws InterruptedException {
         ThreadLocalTest1 obj = new ThreadLocalTest1();
         for (int i = 0; i < 10; i++) {
@@ -37,3 +36,5 @@ public class ThreadLocalTest1 implements Runnable{
         System.out.println("Thread Name= "+Thread.currentThread().getName()+" formatter = "+FORMAT_THREAD_LOCAL.get().toPattern());
     }
 }
+
+
